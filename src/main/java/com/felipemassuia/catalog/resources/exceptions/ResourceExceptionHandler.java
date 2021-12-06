@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.felipemassuia.catalog.services.exceptions.DatabaseException;
 import com.felipemassuia.catalog.services.exceptions.ResourceNotFoundException;
 
 @ControllerAdvice
@@ -17,14 +18,31 @@ public class ResourceExceptionHandler {
 	@ExceptionHandler(ResourceNotFoundException.class)
 	private ResponseEntity<StandadError> entityNotFound(ResourceNotFoundException e, HttpServletRequest request){
 		
+		HttpStatus status = HttpStatus.NOT_FOUND;
+		
 		StandadError error = new StandadError();
-		error.setCode(HttpStatus.NOT_FOUND.value());
+		error.setCode(status.value());
 		error.setError("Resource not found");
 		error.setMessage(e.getMessage());
 		error.setTimestamp(Instant.now());
 		error.setURI(request.getRequestURI());
 		
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+		return ResponseEntity.status(status).body(error);
 	}
-
+	
+	@ExceptionHandler(DatabaseException.class)
+	private ResponseEntity<StandadError>  databaseException(DatabaseException e, HttpServletRequest request){
+		
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		
+		StandadError error = new StandadError();
+		error.setCode(status.value());
+		error.setError("Database exception");
+		error.setMessage(e.getMessage());
+		error.setTimestamp(Instant.now());
+		error.setURI(request.getRequestURI());
+		
+		return ResponseEntity.status(status).body(error);
+	}
+	
 }
